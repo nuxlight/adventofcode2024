@@ -26,7 +26,6 @@ func main() {
 			sec_col = append(sec_col, val)
 		}
 	}
-	//var total []int
 	slices.Sort(first_col)
 	slices.Sort(sec_col)
 	var total = 0
