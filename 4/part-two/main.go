@@ -2,11 +2,14 @@ package main
 
 import (
 	"log"
-	"math"
 	"os"
-	"strconv"
 	"strings"
 )
+
+type position struct {
+	X int
+	Y int
+}
 
 func main() {
 	log.Println("start script")
@@ -16,118 +19,120 @@ func main() {
 	}
 	var total = 0
 	lines := strings.Split(string(data), "\n")
-	for _, line := range lines {
-		numbers := strings.Split(line, " ")
-		if len(numbers) == 1 {
-			continue
-		}
-		if check_line(numbers) {
-			total = total + 1
-			continue
-		} else {
-			var sub_total = 0
-			for i := 0; i < len(numbers); i++ {
-				mod := delete_element_from_array(numbers, i)
+	for y, line := range lines {
+		letters := strings.Split(line, "")
+		for x, letter := range letters {
+			var pos = position{X: x, Y: y}
 
-				if check_line(mod) {
-					sub_total = sub_total + 1
+			if letter == "M" {
+				if check_upper_right(lines, pos) {
+					total = total + 1
+					log.Println("check_upper_right")
+					log.Println(pos)
+				}
+				if check_upper_left(lines, pos) {
+					total = total + 1
+					log.Println("check_upper_left")
+					log.Println(pos)
+				}
+				if check_down_left(lines, pos) {
+					total = total + 1
+					log.Println("check_down_left")
+					log.Println(pos)
+				}
+				if check_down_right(lines, pos) {
+					total = total + 1
+					log.Println("check_down_right")
+					log.Println(pos)
 				}
 			}
-			if sub_total > 0 {
-				total = total + 1
-				continue
-			}
 		}
-
 	}
 	log.Println(total)
 }
 
-func delete_element_from_array(array []string, index int) []string {
-	var final_array = []string{}
-	for i, el := range array {
-		if i != index {
-			final_array = append(final_array, el)
-		}
+func check_upper_right(lines []string, pos position) bool {
+	var word = []string{}
+	read_pos := pos.X
+	for i := pos.Y; i > pos.Y-3; i-- {
+		if i >= 0 {
+			letters := strings.Split(lines[i], "")
+			if read_pos < len(letters) {
 
+				word = append(word, letters[read_pos])
+				read_pos = read_pos + 1
+			}
+		}
 	}
-	return final_array
-}
-
-func check_line(array []string) bool {
-	if check_equality(array) {
-		if check_decreasing(array) {
-			if check_separation(array) {
-				return true
-			}
-		}
-		if check_increase(array) {
-
-			if check_separation(array) {
-				return true
-			}
-		}
+	if check_word(word) {
+		return true
 	}
 	return false
 }
 
-func check_increase(array []string) bool {
-	for i, el := range array {
-		if i != 0 {
-			cur, _ := strconv.Atoi(el)
-			before, _ := strconv.Atoi(array[i-1])
-			if cur > before {
-				return false
+func check_upper_left(lines []string, pos position) bool {
+	var word = []string{}
+	read_pos := pos.X
+	for i := pos.Y; i > pos.Y-3; i-- {
+		if i >= 0 {
+			letters := strings.Split(lines[i], "")
+			if read_pos >= 0 {
+				word = append(word, letters[read_pos])
+				read_pos = read_pos - 1
 			}
 		}
 	}
-	return true
+	if check_word(word) {
+		return true
+	}
+	return false
 }
 
-func check_decreasing(array []string) bool {
-	for i, el := range array {
-		if i != 0 {
-			cur, _ := strconv.Atoi(el)
-			before, _ := strconv.Atoi(array[i-1])
-			if cur < before {
-				return false
+func check_down_right(lines []string, pos position) bool {
+	var word = []string{}
+	read_pos := pos.X
+	for i := pos.Y; i < pos.Y+3; i++ {
+
+		if i < len(lines) {
+			letters := strings.Split(lines[i], "")
+			if read_pos < len(letters) {
+				if len(letters) > 0 {
+					word = append(word, letters[read_pos])
+					read_pos = read_pos + 1
+				}
 			}
 		}
 	}
-	return true
+	if check_word(word) {
+		return true
+	}
+	return false
 }
 
-func check_equality(array []string) bool {
-	for i, el := range array {
-		if i != 0 && i < len(array) {
-			cur, _ := strconv.Atoi(el)
-			before, _ := strconv.Atoi(array[i-1])
-			if cur == before {
-				return false
+func check_down_left(lines []string, pos position) bool {
+	var word = []string{}
+	read_pos := pos.X
+	for i := pos.Y; i < pos.Y+3; i++ {
+		if i < len(lines) {
+			letters := strings.Split(lines[i], "")
+			if read_pos >= 0 {
+				if len(letters) > 0 {
+					word = append(word, letters[read_pos])
+					read_pos = read_pos - 1
+				}
 			}
 		}
 	}
-	return true
+	if check_word(word) {
+		return true
+	}
+	return false
 }
 
-func check_separation(numbers []string) bool {
-	var fail = 0
-	for i, el := range numbers {
-
-		if i != 0 {
-
-			cur, _ := strconv.Atoi(el)
-			before, _ := strconv.Atoi(numbers[i-1])
-			op := cur - before
-			opp := math.Abs(float64(op))
-
-			if opp > 3 {
-				fail = fail + 1
-			}
-		}
+func check_word(word []string) bool {
+	if strings.Join(word, "") == "MAS" {
+		log.Println(word)
+		return true
 	}
-	if fail > 0 {
-		return false
-	}
-	return true
+	return false
 }
